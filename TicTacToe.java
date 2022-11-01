@@ -1,21 +1,23 @@
 import java.util.Scanner;
 
 public class TicTacToe {
-    private static final int gridSpaces = 9;
-    private static final Scanner scanner = new Scanner(System.in);
+    private static final int GRID_SPACES = 9;
+    private static final Scanner SCANNER = new Scanner(System.in);
     private static String tableString = "";
     private static String playerTurn = "X";
 
     public static void main(String[] args) {
         updateTableString(getInitialTableString());
         printGameTable();
-        getPlayerMove();
-        printGameTable();
-        checkGameResult();
+        boolean playerMoveSuccessful;
+        do {
+            playerMoveSuccessful = getPlayerMove();
+        } while (!playerMoveSuccessful);
+        // checkGameResult();
     }
 
     private static String getInitialTableString() {
-        return scanner.nextLine();
+        return SCANNER.nextLine();
     }
 
     private static void updateTableString(String newTableString) {
@@ -23,8 +25,8 @@ public class TicTacToe {
     }
 
     private static void printGameTable() {
-        for (int i = 0; i <= gridSpaces; i++) {
-            if (i == gridSpaces) {
+        for (int i = 0; i <= GRID_SPACES; i++) {
+            if (i == GRID_SPACES) {
                 System.out.println("---------");
             } else if (i == 0) {
                 System.out.print("---------\n| " + tableString.charAt(i) + " ");
@@ -38,12 +40,42 @@ public class TicTacToe {
         }
     }
 
-    private static void getPlayerMove() {
-        int row = scanner.nextInt();
-        int column = scanner.nextInt();
-        int playerMoveIndex = getPlayerMoveIndex(column, row);
-        tableString = tableString.substring(0, playerMoveIndex) + playerTurn +
-                tableString.substring(playerMoveIndex + 1);
+    private static boolean getPlayerMove() {
+        String rowString;
+        String columnString;
+        boolean rowIsNumeric;
+        boolean columnIsNumeric;
+        int row = 0;
+        int column = 0;
+        boolean isPlayerMoveValid = false;
+        int playerMoveIndex;
+        boolean isCellOccupied;
+        do {
+            rowString = SCANNER.next();
+            rowIsNumeric = rowString.chars().allMatch(Character::isDigit);
+            columnString = SCANNER.next();
+            columnIsNumeric = rowString.chars().allMatch(Character::isDigit);
+            if (rowIsNumeric && columnIsNumeric) {
+                row = Integer.parseInt(rowString);
+                column = Integer.parseInt(columnString);
+                if (row >= 1 && row <= 3 && column >= 1 && column <= 3) {
+                    isPlayerMoveValid = true;
+                } else {
+                    System.out.println("Coordinates should be from 1 to 3!");
+                }
+            } else {
+                System.out.println("You should enter numbers!");
+            }
+        } while (!isPlayerMoveValid);
+        playerMoveIndex = getPlayerMoveIndex(column, row);
+        isCellOccupied = checkCellOccupied(playerMoveIndex);
+        if (!isCellOccupied) {
+            tableString = tableString.substring(0, playerMoveIndex) + playerTurn +
+                    tableString.substring(playerMoveIndex + 1);
+            printGameTable();
+            return true;
+        }
+        return false;
     }
 
     private static int getPlayerMoveIndex(int column, int row) {
@@ -68,6 +100,15 @@ public class TicTacToe {
             playerMoveIndex = 8;
         }
         return playerMoveIndex;
+    }
+
+    private static boolean checkCellOccupied(int playerMoveIndex) {
+        boolean isCellOccupied = false;
+        if (tableString.charAt(playerMoveIndex) == 'X' || tableString.charAt(playerMoveIndex) == 'O') {
+            System.out.println("This cell is occupied! Choose another one!");
+            isCellOccupied = true;
+        }
+        return isCellOccupied;
     }
 
     private static void checkGameResult() {
